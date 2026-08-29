@@ -39,12 +39,12 @@ class MirrorSettingsPlugin : Plugin<Settings> {
             ?: return null
 
         if (selection.isEmpty() || selection == "none") return null
-        if (selection.startsWith("https://") || selection.startsWith("http://")) return selection
 
         return MIRRORS[selection]
             ?: throw GradleException(
                 "Unknown $MIRROR_PROPERTY value '$selection'. " +
-                    "Supported values: ${MIRRORS.keys.joinToString()}, none, or a Maven repository URL.",
+                    "Supported values: ${MIRRORS.keys.joinToString()}, none. " +
+                    "Use $MIRROR_URL_PROPERTY for a custom Maven repository URL.",
             )
     }
 

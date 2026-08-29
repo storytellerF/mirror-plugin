@@ -57,9 +57,9 @@ mavenMirror=aliyun
 - `tencent`
 - `huawei`
 - `none`（禁用）
-- 任意以 `https://` 或 `http://` 开头的 Maven 仓库 URL
 
-也可以用独立属性指定 URL；它的优先级高于 `mavenMirror`：
+`mavenMirror` 只接受上述预置名称。自定义镜像地址必须通过
+`mavenMirrorUrl` 指定；它的优先级高于 `mavenMirror`：
 
 ```properties
 mavenMirrorUrl=https://example.com/repository/maven-public/

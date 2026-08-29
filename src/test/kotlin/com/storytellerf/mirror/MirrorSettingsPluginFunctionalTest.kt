@@ -1,5 +1,6 @@
 package com.storytellerf.mirror
 
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -8,6 +9,7 @@ import java.util.UUID
 import kotlin.io.path.createDirectories
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class MirrorSettingsPluginFunctionalTest {
@@ -74,10 +76,28 @@ class MirrorSettingsPluginFunctionalTest {
         )
     }
 
+    @Test
+    fun `rejects URL in named mirror property`() {
+        val result = runBuild(
+            properties = "mavenMirror=https://packages.example.test/maven",
+            expectFailure = true,
+        )
+
+        assertContains(
+            result.output,
+            "Unknown mavenMirror value 'https://packages.example.test/maven'",
+        )
+        assertContains(
+            result.output,
+            "Use mavenMirrorUrl for a custom Maven repository URL.",
+        )
+    }
+
     private fun runBuild(
         properties: String,
         repositories: String = "mavenCentral()",
-    ) {
+        expectFailure: Boolean = false,
+    ): BuildResult {
         projectDir.resolve("settings.gradle.kts").writeText(
             """
             plugins {
@@ -105,7 +125,7 @@ class MirrorSettingsPluginFunctionalTest {
             .createDirectories()
         gradleUserHome.resolve("gradle.properties").writeText(properties)
 
-        GradleRunner.create()
+        val runner = GradleRunner.create()
             .withProjectDir(projectDir.toFile())
             .withPluginClasspath()
             .withArguments(
@@ -114,7 +134,8 @@ class MirrorSettingsPluginFunctionalTest {
                 "--stacktrace",
                 "help",
             )
-            .build()
+
+        return if (expectFailure) runner.buildAndFail() else runner.build()
     }
 
     private fun repositoryUrls(): List<String> =
